@@ -12,3 +12,14 @@
 # OS
 .DS_Store
 Thumbs.db
+
+# Tooling / agents
+.serena/
+.playwright-mcp/
+
+# Local handoff / scratch docs
+*인수인계*.txt
+make_icons.py
+
+# Exported backups
+vocab-backup*.csv
