@@ -1,0 +1,16 @@
+{
+  "name": "영어 단어장",
+  "short_name": "단어장",
+  "description": "CSV 가져오기와 SM-2 간격반복으로 영어 단어를 능동 학습하는 개인용 단어장",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#16181d",
+  "theme_color": "#4f7cff",
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
