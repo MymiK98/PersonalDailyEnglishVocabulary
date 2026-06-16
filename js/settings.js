@@ -18,7 +18,7 @@ export async function getSettings() {
 export async function saveSettings(partial) {
   const cur = await getSettings();
   const next = { ...cur, ...partial, key: 'settings' };
-  next.wordsPerDay = Math.max(0, parseInt(next.wordsPerDay, 10) || 0);
+  next.wordsPerDay = Math.max(1, parseInt(next.wordsPerDay, 10) || 1);
   await put('meta', next);
   return next;
 }

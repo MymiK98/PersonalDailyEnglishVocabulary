@@ -56,7 +56,7 @@ async function pickNewBatch(study, deckCards, today) {
     return { cards: [], deckId: study.selectedDeckId, studied: false, empty: true };
   }
   const settings = await getSettings();
-  const N = settings.wordsPerDay;
+  const N = Math.max(1, settings.wordsPerDay); // 0/음수 방어 → 최소 1개
   const studiedSet = new Set(study.cycleStudiedIds);
   let unstudied = deckCards.filter((c) => !studiedSet.has(c.id));
   if (unstudied.length === 0) {
