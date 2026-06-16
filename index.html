@@ -18,55 +18,56 @@
   <div id="banner" class="banner" hidden></div>
 
   <main class="app-main">
-    <!-- 오늘의 복습 -->
-    <section id="screen-review" class="screen">
-      <h2>오늘의 복습</h2>
-      <div id="review-root" class="review-root"></div>
-    </section>
-
-    <!-- 카드 목록/관리 -->
-    <section id="screen-cards" class="screen" hidden>
-      <h2>카드 관리</h2>
-      <div class="toolbar">
-        <button type="button" id="btn-import" class="btn primary">CSV 가져오기</button>
-        <button type="button" id="btn-export" class="btn">CSV 내보내기</button>
-        <input type="file" id="csv-file" accept=".csv,text/csv" hidden />
-      </div>
-      <p id="cards-count" class="muted"></p>
-      <div id="cards-list" class="cards-list"></div>
+    <!-- 홈: 오늘의 학습 -->
+    <section id="screen-home" class="screen">
+      <h2>오늘의 학습</h2>
+      <div id="home-root"></div>
     </section>
 
     <!-- 통계 -->
     <section id="screen-stats" class="screen" hidden>
       <h2>학습 통계</h2>
       <div class="stat-grid">
-        <div class="stat-box"><span class="stat-num" id="stat-reviewed">0</span><span class="stat-label">오늘 복습</span></div>
+        <div class="stat-box"><span class="stat-num" id="stat-reviewed">0</span><span class="stat-label">오늘 학습</span></div>
         <div class="stat-box"><span class="stat-num" id="stat-streak">0</span><span class="stat-label">연속 학습일</span></div>
-        <div class="stat-box"><span class="stat-num" id="stat-known">0</span><span class="stat-label">아는 단어</span></div>
-        <div class="stat-box"><span class="stat-num" id="stat-total">0</span><span class="stat-label">전체 단어</span></div>
+        <div class="stat-box"><span class="stat-num" id="stat-known">0</span><span class="stat-label">이번 회차</span></div>
+        <div class="stat-box"><span class="stat-num" id="stat-total">0</span><span class="stat-label">단어장 단어</span></div>
       </div>
-      <button type="button" id="copy-words" class="btn" disabled>오늘 복습한 단어 복사</button>
     </section>
 
     <!-- 설정 -->
     <section id="screen-settings" class="screen" hidden>
       <h2>설정</h2>
       <label class="field">
-        <span>하루 새 카드 수</span>
-        <input type="number" id="set-newPerDay" min="0" max="999" />
+        <span>하루 학습 단어 수</span>
+        <input type="number" id="set-wordsPerDay" min="1" max="999" />
       </label>
       <label class="field">
         <span>알림 시각</span>
         <input type="time" id="set-notifyTime" />
       </label>
       <button type="button" id="btn-save-settings" class="btn primary">저장</button>
-      <p class="muted small">알림은 기기 지원 시에만 예약됩니다. 미지원이면 앱을 열 때 밀린 개수를 배지/배너로 알려줍니다.</p>
+      <p class="muted small">설정한 시각에 오늘 학습을 안 했으면 학습 알림, 했으면 복습 알림을 보냅니다. 알림은 기기 지원 시에만 예약되며(iOS 미지원), 문구는 앱을 마지막으로 연 시점의 학습 여부 기준입니다. 미지원 시 앱을 열 때 배지/배너로 알려줍니다.</p>
+
+      <h3>단어장(CSV) 관리</h3>
+      <div class="toolbar">
+        <input type="text" id="new-deck-name" placeholder="새 단어장 이름" />
+        <button type="button" id="btn-new-deck" class="btn">단어장 추가</button>
+      </div>
+      <label class="field">
+        <span>가져올 단어장</span>
+        <select id="import-deck"></select>
+      </label>
+      <div class="toolbar">
+        <button type="button" id="btn-import" class="btn primary">CSV 가져오기</button>
+        <input type="file" id="csv-file" accept=".csv,text/csv" hidden />
+      </div>
+      <div id="deck-list" class="deck-list"></div>
     </section>
   </main>
 
   <nav class="app-nav">
-    <button type="button" data-nav="review" class="nav-btn active">복습</button>
-    <button type="button" data-nav="cards" class="nav-btn">카드</button>
+    <button type="button" data-nav="home" class="nav-btn active">홈</button>
     <button type="button" data-nav="stats" class="nav-btn">통계</button>
     <button type="button" data-nav="settings" class="nav-btn">설정</button>
   </nav>

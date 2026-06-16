@@ -1,25 +1,89 @@
 // db.js — IndexedDB 래퍼
-// DB: vocabPWA, 버전 1
-// store: cards(keyPath: word), meta(keyPath: key)
+// DB: vocabPWA, 버전 2
+// store: cards(keyPath: id, autoIncrement), decks(keyPath: id, autoIncrement), meta(keyPath: key)
 
 const DB_NAME = 'vocabPWA';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbPromise = null;
+
+// cards 스토어 생성: id 자동증가 PK, 덱 조회 인덱스, 덱 내 단어 유일 인덱스
+function makeCardsStore(db) {
+  const cards = db.createObjectStore('cards', { keyPath: 'id', autoIncrement: true });
+  cards.createIndex('byDeck', 'deckId', { unique: false });
+  cards.createIndex('byDeckWord', ['deckId', 'word'], { unique: true });
+  return cards;
+}
+
+// decks 스토어 생성: id 자동증가 PK
+function makeDecksStore(db) {
+  return db.createObjectStore('decks', { keyPath: 'id', autoIncrement: true });
+}
+
+// v1 → v2 마이그레이션: cards keyPath(word→id) 변경 + decks 도입.
+// versionchange 트랜잭션의 raw 요청만 사용(openDB 헬퍼 호출 금지 → 데드락).
+function migrateV1toV2(db, tx) {
+  const getAllReq = tx.objectStore('cards').getAll();
+  getAllReq.onsuccess = () => {
+    const oldCards = getAllReq.result || [];
+    db.deleteObjectStore('cards'); // keyPath 변경 불가 → 삭제 후 재생성
+    const cards = makeCardsStore(db);
+    const decks = makeDecksStore(db);
+    const deckReq = decks.add({ name: '기본', createdAt: Date.now() });
+    deckReq.onsuccess = () => {
+      const deckId = deckReq.result;
+      for (const c of oldCards) {
+        // SRS 필드(ease/interval/repetitions/dueDate/lastReviewed) 폐기
+        cards.add({
+          deckId,
+          word: c.word,
+          phonetic: c.phonetic,
+          meaning: c.meaning,
+          example: c.example,
+          addedAt: c.addedAt ?? Date.now(),
+        });
+      }
+      tx.objectStore('meta').put({
+        key: 'study',
+        selectedDeckId: deckId,
+        cycleStudiedIds: [],
+        cycleStartedAt: Date.now(),
+      });
+    };
+  };
+}
 
 export function openDB() {
   if (dbPromise) return dbPromise;
   dbPromise = new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = () => {
+    req.onupgradeneeded = (event) => {
       const db = req.result;
-      if (!db.objectStoreNames.contains('cards')) {
-        const cards = db.createObjectStore('cards', { keyPath: 'word' });
-        cards.createIndex('byDueDate', 'dueDate', { unique: false });
-        cards.createIndex('byAddedAt', 'addedAt', { unique: false });
-      }
+      const tx = req.transaction;
+      const oldVersion = event.oldVersion;
+
       if (!db.objectStoreNames.contains('meta')) {
         db.createObjectStore('meta', { keyPath: 'key' });
+      }
+
+      if (oldVersion < 1) {
+        // 신규 설치: 새 스키마 + 기본 덱
+        makeDecksStore(db);
+        makeCardsStore(db);
+        const deckReq = tx.objectStore('decks').add({ name: '기본', createdAt: Date.now() });
+        deckReq.onsuccess = () => {
+          tx.objectStore('meta').put({
+            key: 'study',
+            selectedDeckId: deckReq.result,
+            cycleStudiedIds: [],
+            cycleStartedAt: Date.now(),
+          });
+        };
+        return;
+      }
+
+      if (oldVersion < 2) {
+        migrateV1toV2(db, tx);
       }
     };
     req.onsuccess = () => resolve(req.result);

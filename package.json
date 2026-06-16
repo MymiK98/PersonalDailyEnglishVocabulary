@@ -1,0 +1,13 @@
+{
+  "name": "personal-daily-english-vocabulary",
+  "version": "2.0.0",
+  "description": "개인용 영어 단어장 PWA",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "^6.0.0"
+  }
+}

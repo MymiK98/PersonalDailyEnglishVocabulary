@@ -1,7 +1,7 @@
 // csv.js — CSV 파싱/직렬화 (가져오기·내보내기)
 // 헤더: word,phonetic,meaning,example (UTF-8)
 
-import { getAll, addMany } from './db.js';
+import { getByIndex, addMany } from './db.js';
 
 const HEADER = ['word', 'phonetic', 'meaning', 'example'];
 
@@ -30,7 +30,7 @@ export function parseCSV(text) {
   return rows;
 }
 
-export function rowsToCards(rows) {
+export function rowsToCards(rows, deckId) {
   if (rows.length === 0) return [];
   const cards = [];
   const now = Date.now();
@@ -42,23 +42,19 @@ export function rowsToCards(rows) {
     const word = (r[0] || '').trim();
     if (!word) continue;
     cards.push({
+      deckId,
       word,
       phonetic: (r[1] || '').trim(),
       meaning: (r[2] || '').trim(),
       example: (r[3] || '').trim(),
-      ease: 2.5,
-      interval: 0,
-      repetitions: 0,
-      dueDate: null,
-      lastReviewed: null,
       addedAt: now + i,
     });
   }
   return cards;
 }
 
-export async function importCSV(text) {
-  const cards = rowsToCards(parseCSV(text));
+export async function importCSV(text, deckId) {
+  const cards = rowsToCards(parseCSV(text), deckId);
   const seen = new Set();
   const unique = [];
   let dupInFile = 0;
@@ -67,6 +63,7 @@ export async function importCSV(text) {
     seen.add(c.word);
     unique.push(c);
   }
+  // 덱 내 기존 중복은 byDeckWord unique 인덱스가 addMany에서 자동 스킵
   const { addedWords, skipped } = await addMany('cards', unique);
   return { added: addedWords.length, skipped: skipped + dupInFile };
 }
@@ -77,8 +74,8 @@ function escapeField(v) {
   return s;
 }
 
-export async function exportCSV() {
-  const cards = await getAll('cards');
+export async function exportCSV(deckId) {
+  const cards = await getByIndex('cards', 'byDeck', IDBKeyRange.only(deckId));
   const lines = [HEADER.join(',')];
   for (const c of cards) {
     lines.push(HEADER.map((h) => escapeField(c[h])).join(','));
@@ -86,8 +83,8 @@ export async function exportCSV() {
   return lines.join('\n');
 }
 
-export async function downloadCSV(filename = 'vocab-backup.csv') {
-  const csv = await exportCSV();
+export async function downloadCSV(deckId, filename = 'vocab-backup.csv') {
+  const csv = await exportCSV(deckId);
   const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

@@ -1,7 +1,7 @@
 // sw.js — 서비스워커: 앱 셸을 캐시해 오프라인 동작
 // 코드 변경 후 폰에서 옛 화면이 보이면 CACHE 버전(v1)을 올린다.
 
-const CACHE = 'vocab-pwa-v1';
+const CACHE = 'vocab-pwa-v2';
 const SHELL = [
   './',
   './index.html',
@@ -10,8 +10,10 @@ const SHELL = [
   './js/app.js',
   './js/db.js',
   './js/csv.js',
+  './js/decks.js',
+  './js/cycle.js',
+  './js/home.js',
   './js/srs.js',
-  './js/review.js',
   './js/stats.js',
   './js/settings.js',
   './js/tts.js',
