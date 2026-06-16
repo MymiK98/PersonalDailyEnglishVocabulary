@@ -2,17 +2,23 @@
 
 import { get, put } from './db.js';
 
-const DEFAULTS = { key: 'settings', newPerDay: 20, notifyTime: '09:00' };
+const DEFAULTS = { key: 'settings', wordsPerDay: 20, notifyTime: '09:00', studyMode: 'card' };
 
 export async function getSettings() {
   const s = await get('meta', 'settings');
-  return { ...DEFAULTS, ...(s || {}) };
+  const merged = { ...DEFAULTS, ...(s || {}) };
+  // 레거시 newPerDay → wordsPerDay 매핑 (구버전 설정 호환)
+  if (s && s.newPerDay != null && s.wordsPerDay == null) {
+    merged.wordsPerDay = s.newPerDay;
+  }
+  delete merged.newPerDay;
+  return merged;
 }
 
 export async function saveSettings(partial) {
   const cur = await getSettings();
   const next = { ...cur, ...partial, key: 'settings' };
-  next.newPerDay = Math.max(0, parseInt(next.newPerDay, 10) || 0);
+  next.wordsPerDay = Math.max(0, parseInt(next.wordsPerDay, 10) || 0);
   await put('meta', next);
   return next;
 }
