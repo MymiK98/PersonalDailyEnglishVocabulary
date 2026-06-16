@@ -13,6 +13,9 @@
 .DS_Store
 Thumbs.db
 
+# Dependencies
+node_modules/
+
 # Tooling / agents
 .serena/
 .playwright-mcp/

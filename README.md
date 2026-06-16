@@ -56,6 +56,16 @@ python3 -m http.server 8000
 # http://localhost:8000 접속
 ```
 
+## 테스트
+도메인 로직 단위 테스트(`node:test` + `fake-indexeddb`):
+
+```bash
+npm install   # 최초 1회 (dev: fake-indexeddb)
+npm test
+```
+
+`test/`에 srs(날짜 헬퍼)·csv(파싱)·decks(CRUD/cascade)·cycle(회차/배치)·db(v1→v2 마이그레이션) 커버.
+
 ## 파일 구조
 ```
 index.html        화면 골격 + 하단 탭 네비(홈/통계/설정)
